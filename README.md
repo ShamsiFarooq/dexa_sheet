@@ -1,16 +1,70 @@
-# excel_planner
+# Excel Planner
 
-A new Flutter project.
+A Flutter-based spreadsheet application inspired by Google Sheets and Microsoft Excel.  
+This project was built as part of an interview task to demonstrate clean architecture, UI/UX design, and local data persistence.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## Overview
 
-A few resources to get you started if this is your first Flutter project:
+Excel Planner allows users to create and manage multiple sheets, each containing an editable grid of cells.  
+The app supports adding and deleting rows and columns, saving data locally, and exporting content as CSV files.  
+It provides a fast, lightweight, and intuitive spreadsheet experience built entirely with Flutter.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Features
+
+- Splash screen with custom app theme  
+- Multi-sheet management: create, rename, delete, and view sheets  
+- Editable grid with dynamic row and column operations  
+- Auto-save with debounce (saves automatically after edits)  
+- Persistent local storage using Hive  
+- Export sheets to CSV format  
+- Clean, responsive UI with both horizontal and vertical scrolling  
+- Consistent color scheme and simple layout
+
+---
+
+## Architecture
+
+This app follows the Clean Architecture pattern, separating the codebase into clear layers for scalability and testability.
+
+lib/
+├── core/ # App constants and shared utilities
+├── data/ # Local data source (Hive implementation)
+├── domain/ # Entities and UseCases
+├── presentation/ # UI, Providers, and Widgets
+│ ├── pages/
+│ ├── providers/
+│ └── widgets/
+└── main.dart # Application entry point
+
+
+
+- **State Management:** Provider  
+- **Local Storage:** Hive  
+- **Architecture Pattern:** Clean Architecture  
+- **Language:** Dart (Flutter SDK 3.7+)  
+
+---
+
+## Tech Stack
+
+| Category | Package / Tool |
+|-----------|----------------|
+| Framework | Flutter |
+| State Management | Provider |
+| Local Storage | Hive, hive_flutter |
+| Utilities | path_provider, uuid, intl, csv |
+| Build Tools | flutter_launcher_icons |
+| Version Control | Git / GitHub |
+
+---
+
+## Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ShamsiFarooq/excel_planner.git
+   cd excel_planner
