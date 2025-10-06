@@ -1,24 +1,63 @@
-import 'package:excel_planner/presentation/%20providers/ui_sheet_provider.dart';
-import 'package:excel_planner/presentation/widgets/grid_widget.dart';
+import 'dart:io';
+
+import 'package:excel_planner/presentation/%20providers/sheet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../widgets/grid_widget.dart';
+import 'package:path_provider/path_provider.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends StatefulWidget {
+  final String sheetId;
+  const HomePage({super.key, required this.sheetId});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+class _HomePageState extends State<HomePage> {
+ @override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    Provider.of<SheetProvider>(context, listen: false).load(widget.sheetId);
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<UiSheetProvider>(context, listen: false);
-
+    // Use Provider inline rather than storing a late field.
+   // final provider = Provider.of<SheetProvider>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E7D32),
         title: const Text('Excel-like Planner'),
         actions: [
           IconButton(
-            tooltip: 'Search',
-            icon: const Icon(Icons.search),
-            onPressed: () {},
+            tooltip: 'Save locally',
+            icon: const Icon(Icons.save),
+            onPressed: () async {
+              try {
+                final prov = Provider.of<SheetProvider>(context, listen: false);
+                debugPrint('Saving sheet...');
+
+                await prov.save(); // await to ensure Hive write finishes
+                debugPrint('Save completed.');
+
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved locally')));
+              } catch (e, st) {
+                debugPrint('Error saving sheet: $e\n$st');
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Save error: $e')));
+              }
+            },
+          ),
+          IconButton(
+            tooltip: 'Export CSV',
+            icon: const Icon(Icons.file_download),
+            onPressed: () async {
+              final prov = Provider.of<SheetProvider>(context, listen: false);
+              final csv = prov.exportCsv();
+              await _saveCsvToTemp(csv);
+            },
           ),
           const SizedBox(width: 8),
         ],
@@ -27,7 +66,7 @@ class HomePage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF2E7D32),
         child: const Icon(Icons.add),
-        onPressed: () => provider.addRow(),
+        onPressed: () => Provider.of<SheetProvider>(context, listen: false).addRow(),
       ),
       bottomNavigationBar: BottomAppBar(
         elevation: 8,
@@ -43,5 +82,16 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _saveCsvToTemp(String csv) async {
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/sheet_export.csv');
+      await file.writeAsString(csv);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('CSV exported: ${file.path}')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting CSV: $e')));
+    }
   }
 }

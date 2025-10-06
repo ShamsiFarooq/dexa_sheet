@@ -1,4 +1,4 @@
-import 'package:excel_planner/presentation/%20providers/ui_sheet_provider.dart';
+import 'package:excel_planner/presentation/%20providers/sheet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,14 +17,14 @@ class _CellEditorState extends State<CellEditor> {
 
   @override
   void initState() {
-    final provider = Provider.of<UiSheetProvider>(context, listen: false);
+    final provider = Provider.of<SheetProvider>(context, listen: false);
     _controller = TextEditingController(text: provider.cellAt(widget.row, widget.col));
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<UiSheetProvider>(context, listen: false);
+    final provider = Provider.of<SheetProvider>(context, listen: false);
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
