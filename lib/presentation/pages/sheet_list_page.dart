@@ -113,16 +113,25 @@ Future<void> _refreshList() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Sheets'),
-        backgroundColor: const Color(0xFF2E7D32),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _createNew,
-          )
-        ],
-      ),
+     appBar: AppBar(
+  elevation: 0,
+  backgroundColor: const Color(0xFF2E7D32),
+  title: Row(
+    children: const [
+      Icon(Icons.table_chart_rounded, color: Colors.white),
+      SizedBox(width: 8),
+      Text('Excel Planner', style: TextStyle(fontWeight: FontWeight.w600)),
+    ],
+  ),
+  actions: [
+    IconButton(
+      icon: const Icon(Icons.add, color: Colors.white),
+      onPressed: _createNew,
+      tooltip: 'Create new sheet',
+    ),
+  ],
+),
+
       body: meta.isEmpty
     ? const Center(child: Text('No sheets yet. Tap + to create one.'))
     : RefreshIndicator(

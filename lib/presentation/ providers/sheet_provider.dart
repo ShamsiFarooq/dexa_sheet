@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:excel_planner/core/constants.dart';
 import 'package:excel_planner/domain/entities/sheet.dart';
 import 'package:excel_planner/domain/usecases/load_sheet_usecase.dart';
@@ -6,21 +7,47 @@ import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 
 class SheetProvider extends ChangeNotifier {
+  final LoadSheetUseCase loadUseCase;
+  final SaveSheetUseCase saveUseCase;
+
   Sheet _sheet = Sheet.empty(
     rows: Constants.defaultRows,
     cols: Constants.defaultCols,
   );
-  final LoadSheetUseCase loadUseCase;
-  final SaveSheetUseCase saveUseCase;
+
+  String? _activeSheetId;
+
+  Timer? _saveTimer;
 
   bool isLoading = true;
 
-  String? _activeSheetId;
-  String get activeSheetName => _sheet.name;
-
-  SheetProvider({required this.loadUseCase, required this.saveUseCase});
+  SheetProvider({
+    required this.loadUseCase,
+    required this.saveUseCase,
+  });
 
   Sheet get sheet => _sheet;
+  String get activeSheetName => _sheet.name;
+
+
+  Future<void> load(String id) async {
+    try {
+      isLoading = true;
+      notifyListeners();
+      final loadedSheet = await loadUseCase(id);
+      _sheet = loadedSheet;
+      _activeSheetId = id;
+    } catch (e, st) {
+      debugPrint('Error loading sheet: $e\n$st');
+      _sheet = Sheet.empty(
+        rows: Constants.defaultRows,
+        cols: Constants.defaultCols,
+      );
+    } finally {
+      isLoading = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
+    }
+  }
 
   Future<void> loadById(String id) async {
     try {
@@ -68,84 +95,83 @@ class SheetProvider extends ChangeNotifier {
     return repo.getAllSheets();
   }
 
-
-  Future<void> load(String id) async {
-    try {
-      isLoading = true;
-      notifyListeners();
-      final loadedSheet = await loadUseCase(id);
-      _sheet = loadedSheet;
-    } catch (e, st) {
-      debugPrint('Error loading sheet: $e\n$st');
-      _sheet = Sheet.empty(
-        rows: Constants.defaultRows,
-        cols: Constants.defaultCols,
-      );
-    } finally {
-      isLoading = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifyListeners();
-      });
-    }
-  }
-
   Future<void> save() async {
     try {
-      _sheet.lastModified = DateTime.now(); 
+      _sheet.lastModified = DateTime.now();
       await saveUseCase(_sheet);
-      debugPrint('Provider: saveUseCase completed.');
+      debugPrint('✅ SheetProvider: Saved successfully.');
     } catch (e, st) {
-      debugPrint('Provider save error: $e\n$st');
-      rethrow;
+      debugPrint('❌ SheetProvider save error: $e\n$st');
     }
   }
+
 
   String cellAt(int r, int c) => _sheet.data[r][c];
 
   void updateCell(int r, int c, String value) {
     _sheet.data[r][c] = value;
+    _sheet.lastModified = DateTime.now();
     notifyListeners();
+
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(seconds: 2), () async {
+      await save();
+    });
   }
 
-  void addRow({int at = -1}) {
-    final cols =
-        _sheet.data.isNotEmpty ? _sheet.data[0].length : Constants.defaultCols;
-    final row = List.generate(cols, (_) => '');
-    if (at < 0 || at >= _sheet.data.length) {
-      _sheet.data.add(row);
+
+  void addRow({int? index}) {
+    final cols = _sheet.data[0].length;
+    final newRow = List.generate(cols, (_) => '');
+    if (index == null || index >= _sheet.data.length) {
+      _sheet.data.add(newRow);
     } else {
-      _sheet.data.insert(at, row);
+      _sheet.data.insert(index + 1, newRow);
     }
+    _sheet.lastModified = DateTime.now();
     notifyListeners();
-  }
-
-  void addColumn({int at = -1}) {
-    for (var row in _sheet.data) {
-      if (at < 0 || at >= row.length) {
-        row.add('');
-      } else {
-        row.insert(at, '');
-      }
-    }
-    notifyListeners();
+    
   }
 
   void removeRow(int index) {
     if (_sheet.data.length <= 1) return;
     _sheet.data.removeAt(index);
+    _sheet.lastModified = DateTime.now();
     notifyListeners();
+
+  
+  }
+
+  void addColumn({int? index}) {
+    for (var row in _sheet.data) {
+      if (index == null || index >= row.length) {
+        row.add('');
+      } else {
+        row.insert(index + 1, '');
+      }
+    }
+    _sheet.lastModified = DateTime.now();
+    notifyListeners();
+   
   }
 
   void removeColumn(int index) {
-    final cols = _sheet.data[0].length;
-    if (cols <= 1) return;
+    if (_sheet.data[0].length <= 1) return;
     for (var row in _sheet.data) {
       row.removeAt(index);
     }
+    _sheet.lastModified = DateTime.now();
     notifyListeners();
   }
 
+
   String exportCsv() {
     return const ListToCsvConverter().convert(_sheet.data);
+  }
+
+  @override
+  void dispose() {
+    _saveTimer?.cancel();
+    super.dispose();
   }
 }

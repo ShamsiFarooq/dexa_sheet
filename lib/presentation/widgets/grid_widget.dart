@@ -4,8 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'cell_editor.dart';
 
-class GridWidget extends StatelessWidget {
+class GridWidget extends StatefulWidget {
   const GridWidget({super.key});
+
+  @override
+  State<GridWidget> createState() => _GridWidgetState();
+}
+
+class _GridWidgetState extends State<GridWidget> {
+  int? selectedRow;
+  int? selectedCol;
+
+  void _showEditDialog(
+    BuildContext context,
+    SheetProvider provider,
+    int r,
+    int c,
+  ) {
+    // set selection then open editor
+    setState(() {
+      selectedRow = r;
+      selectedCol = c;
+    });
+
+    showDialog(
+      context: context,
+      builder:
+          (_) => CellEditor(
+            row: r,
+            col: c,
+            onSaved: () {
+              // keep selection after save (optional)
+              setState(() {});
+            },
+          ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +49,9 @@ class GridWidget extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final data = provider.sheet.data;
+        final sheet = provider.sheet;
+
+        final data = sheet.data;
         final rows = data.length;
         final cols = data.isNotEmpty ? data[0].length : 0;
 
@@ -64,7 +100,7 @@ class GridWidget extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(color: Colors.grey.shade300),
-                          boxShadow: [
+                          boxShadow: const [
                             BoxShadow(
                               color: Colors.black12,
                               blurRadius: 4,
@@ -92,7 +128,7 @@ class GridWidget extends StatelessWidget {
                           width: Constants.leftHeaderWidth,
                           height: Constants.headerHeight,
                         ),
-                        for (var c = 0; c < cols; c++) headerCell(c),
+                        for (var c = 0; c < cols; c++) _headerCell(context, c),
                       ],
                     ),
                   ),
@@ -131,46 +167,51 @@ class GridWidget extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          '${rIdx + 1}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // Row number
+                                          Text(
+                                            '${rIdx + 1}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        PopupMenuButton<String>(
-                                          iconSize: 16,
-                                          onSelected: (v) {
-                                            if (v == 'add') {
-                                              Provider.of<SheetProvider>(
-                                                context,
-                                                listen: false,
-                                              ).addRow(at: rIdx + 1);
-                                            }
-                                            if (v == 'del') {
-                                              Provider.of<SheetProvider>(
-                                                context,
-                                                listen: false,
-                                              ).removeRow(rIdx);
-                                            }
-                                          },
-                                          itemBuilder:
-                                              (_) => const [
-                                                PopupMenuItem(
-                                                  value: 'add',
-                                                  child: Text('Add row below'),
-                                                ),
-                                                PopupMenuItem(
-                                                  value: 'del',
-                                                  child: Text('Delete row'),
-                                                ),
-                                              ],
-                                        ),
-                                      ],
+                                          const SizedBox(width: 6),
+                                          // Row actions
+                                          PopupMenuButton<String>(
+                                            padding: EdgeInsets.zero,
+                                            iconSize: 18,
+                                            onSelected: (v) {
+                                              final prov =
+                                                  Provider.of<SheetProvider>(
+                                                    context,
+                                                    listen: false,
+                                                  );
+                                              if (v == 'add')
+                                                prov.addRow(index: rIdx);
+                                              if (v == 'del')
+                                                prov.removeRow(rIdx);
+                                            },
+                                            itemBuilder:
+                                                (_) => const [
+                                                  PopupMenuItem(
+                                                    value: 'add',
+                                                    child: Text(
+                                                      'Add row below',
+                                                    ),
+                                                  ),
+                                                  PopupMenuItem(
+                                                    value: 'del',
+                                                    child: Text('Delete row'),
+                                                  ),
+                                                ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
 
@@ -179,14 +220,11 @@ class GridWidget extends StatelessWidget {
                                     GestureDetector(
                                       behavior: HitTestBehavior.opaque,
                                       onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder:
-                                              (_) => CellEditor(
-                                                row: rIdx,
-                                                col: c,
-                                                onSaved: () {},
-                                              ),
+                                        _showEditDialog(
+                                          context,
+                                          provider,
+                                          rIdx,
+                                          c,
                                         );
                                       },
                                       child: Container(
@@ -205,8 +243,16 @@ class GridWidget extends StatelessWidget {
                                               color: Colors.grey.shade300,
                                             ),
                                           ),
+                                          color:
+                                              (selectedRow == rIdx &&
+                                                      selectedCol == c)
+                                                  ? Colors.lightGreen.shade100
+                                                  : Colors.white,
                                         ),
-                                        child: Text(provider.cellAt(rIdx, c)),
+                                        child: Text(
+                                          provider.cellAt(rIdx, c),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
                                     ),
                                 ],
@@ -226,7 +272,8 @@ class GridWidget extends StatelessWidget {
     );
   }
 
-  Widget headerCell(int c) {
+  Widget _headerCell(BuildContext context, int c) {
+    final provider = Provider.of<SheetProvider>(context, listen: false);
     return Container(
       width: Constants.cellWidth,
       height: Constants.headerHeight,
@@ -235,9 +282,26 @@ class GridWidget extends StatelessWidget {
         color: const Color(0xFFE8F5E9),
         border: Border(right: BorderSide(color: Colors.grey.shade300)),
       ),
-      child: Text(
-        _colName(c),
-        style: const TextStyle(fontWeight: FontWeight.w700),
+      child: PopupMenuButton<String>(
+        padding: EdgeInsets.zero,
+        onSelected: (v) {
+          if (v == 'add') {
+            provider.addColumn(index: c);
+          } else if (v == 'del') {
+            provider.removeColumn(c);
+          }
+        },
+        itemBuilder:
+            (_) => const [
+              PopupMenuItem(value: 'add', child: Text('Add column right')),
+              PopupMenuItem(value: 'del', child: Text('Delete column')),
+            ],
+        child: Center(
+          child: Text(
+            _colName(c),
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
       ),
     );
   }
