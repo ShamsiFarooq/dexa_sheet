@@ -9,3 +9,5 @@ build/
 **/GeneratedPluginRegistrant.*
 android/.gradle/
 ios/Pods/
+key.properties
+*.jks

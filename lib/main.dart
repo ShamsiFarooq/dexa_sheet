@@ -1,5 +1,6 @@
-import 'package:excel_planner/presentation/%20providers/sheet_provider.dart';
-import 'package:excel_planner/presentation/pages/splash_page.dart';
+
+import 'package:dexa_sheet/presentation/%20providers/sheet_provider.dart';
+import 'package:dexa_sheet/presentation/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';

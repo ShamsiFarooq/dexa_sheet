@@ -1,4 +1,4 @@
-package com.example.excel_planner
+package com.dexasheet.dexasheet
 
 import io.flutter.embedding.android.FlutterActivity
 

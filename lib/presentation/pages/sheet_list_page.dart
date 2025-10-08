@@ -1,8 +1,9 @@
-import 'package:excel_planner/core/constants.dart';
-import 'package:excel_planner/data/datasources/local_datasource.dart';
-import 'package:excel_planner/data/repositories/sheet_repository_impl.dart';
-import 'package:excel_planner/domain/entities/sheet.dart';
-import 'package:excel_planner/presentation/pages/home_page.dart';
+
+import 'package:dexa_sheet/core/constants.dart';
+import 'package:dexa_sheet/data/datasources/local_datasource.dart';
+import 'package:dexa_sheet/data/repositories/sheet_repository_impl.dart';
+import 'package:dexa_sheet/domain/entities/sheet.dart';
+import 'package:dexa_sheet/presentation/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
@@ -120,7 +121,7 @@ Future<void> _refreshList() async {
     children: const [
       Icon(Icons.table_chart_rounded, color: Colors.white),
       SizedBox(width: 8),
-      Text('Excel Planner', style: TextStyle(fontWeight: FontWeight.w600)),
+      Text('Dexa sheet', style: TextStyle(fontWeight: FontWeight.w600)),
     ],
   ),
   actions: [

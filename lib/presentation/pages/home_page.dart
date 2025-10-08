@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:excel_planner/presentation/%20providers/sheet_provider.dart';
+import 'package:dexa_sheet/presentation/%20providers/sheet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/grid_widget.dart';
@@ -30,7 +30,7 @@ void initState() {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E7D32),
-        title: const Text('Excel-like Planner'),
+        title: const Text('Dexa Sheet'),
         actions: [
           IconButton(
             tooltip: 'Save locally',

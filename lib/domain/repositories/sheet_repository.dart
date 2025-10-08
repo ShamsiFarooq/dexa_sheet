@@ -1,5 +1,6 @@
 
-import 'package:excel_planner/domain/entities/sheet.dart';
+
+import 'package:dexa_sheet/domain/entities/sheet.dart';
 
 abstract class SheetRepository {
   Future<List<SheetMeta>> getAllSheets();
