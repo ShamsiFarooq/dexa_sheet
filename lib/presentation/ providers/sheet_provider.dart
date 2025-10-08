@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:excel_planner/core/constants.dart';
-import 'package:excel_planner/domain/entities/sheet.dart';
-import 'package:excel_planner/domain/usecases/load_sheet_usecase.dart';
-import 'package:excel_planner/domain/usecases/save_sheet_usecase.dart';
+import 'package:dexa_sheet/core/constants.dart';
+import 'package:dexa_sheet/domain/entities/sheet.dart';
+import 'package:dexa_sheet/domain/usecases/load_sheet_usecase.dart';
+import 'package:dexa_sheet/domain/usecases/save_sheet_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 
