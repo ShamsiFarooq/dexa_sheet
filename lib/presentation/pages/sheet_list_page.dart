@@ -4,8 +4,10 @@ import 'package:dexa_sheet/data/datasources/local_datasource.dart';
 import 'package:dexa_sheet/data/repositories/sheet_repository_impl.dart';
 import 'package:dexa_sheet/domain/entities/sheet.dart';
 import 'package:dexa_sheet/presentation/pages/home_page.dart';
+import 'package:dexa_sheet/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 
 class SheetListPage extends StatefulWidget {
   const SheetListPage({super.key});
@@ -113,6 +115,8 @@ Future<void> _refreshList() async {
 
   @override
   Widget build(BuildContext context) {
+        final auth = context.watch<AuthProvider>();
+
     return Scaffold(
      appBar: AppBar(
   elevation: 0,
@@ -125,6 +129,15 @@ Future<void> _refreshList() async {
     ],
   ),
   actions: [
+     if (auth.user != null)
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Sign out',
+              onPressed: () async {
+                await context.read<AuthProvider>().signOut();
+                // After sign out, AuthGate will auto-redirect to SignInPage
+              },
+            ),
     IconButton(
       icon: const Icon(Icons.add, color: Colors.white),
       onPressed: _createNew,
@@ -158,7 +171,8 @@ Future<void> _refreshList() async {
                 ],
               ),
             );
-          },
+          },  
+
         ),
       ),
 

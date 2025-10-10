@@ -1,6 +1,10 @@
 
-import 'package:dexa_sheet/presentation/%20providers/sheet_provider.dart';
-import 'package:dexa_sheet/presentation/pages/splash_page.dart';
+import 'package:dexa_sheet/data/repositories/firebase_auth_repository.dart';
+import 'package:dexa_sheet/firebase_options.dart';
+import 'package:dexa_sheet/presentation/providers/auth_provider.dart';
+import 'package:dexa_sheet/presentation/providers/sheet_provider.dart';
+import 'package:dexa_sheet/presentation/pages/splash_router.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -10,10 +14,16 @@ import 'data/repositories/sheet_repository_impl.dart';
 import 'domain/usecases/load_sheet_usecase.dart';
 import 'domain/usecases/save_sheet_usecase.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   final box = await Hive.openBox(Constants.hiveBoxName);
+
+await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+);
+
 
   final localDataSource = LocalDataSource(box);
   final repository = SheetRepositoryImpl(localDataSource);
@@ -36,6 +46,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider(FirebaseAuthRepository())),
         ChangeNotifierProvider(
           create:
               (_) => SheetProvider(
@@ -46,7 +57,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Excel-like Planner',
+        title: 'Dexa Sheet',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D32)),
           useMaterial3: true,
@@ -59,7 +70,7 @@ class MyApp extends StatelessWidget {
           textTheme: const TextTheme(bodyMedium: TextStyle(fontSize: 14)),
         ),
 
-        home: const SplashPage(),
+          home: const SplashRouter(),
       ),
     );
   }

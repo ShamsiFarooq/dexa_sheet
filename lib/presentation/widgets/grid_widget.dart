@@ -1,5 +1,5 @@
 import 'package:dexa_sheet/core/constants.dart';
-import 'package:dexa_sheet/presentation/%20providers/sheet_provider.dart';
+import 'package:dexa_sheet/presentation/providers/sheet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'cell_editor.dart';
