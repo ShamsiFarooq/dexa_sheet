@@ -1,15 +1,63 @@
+# Flutter/Dart tooling
 .dart_tool/
 .packages
+.pub/
+.pub-cache/
+.buildlog/
+.melos_tool/
+
+# Project builds
 build/
-.flutter-plugins
-.flutter-plugins-dependencies
+**/build/
+
+# IDEs
 .idea/
 .vscode/
 *.iml
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Flutter generated (safe to ignore)
+.flutter-plugins
+.flutter-plugins-dependencies
 **/GeneratedPluginRegistrant.*
+
+# Android
 android/.gradle/
-ios/Pods/
-key.properties
+android/local.properties
+**/.cxx/
+**/captures/
 *.jks
+*.keystore
+*.keystore.properties
+key.properties
+
+# Google Services (DO NOT COMMIT)
 android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
 firebase-debug.log
+
+# iOS / CocoaPods
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+
+# macOS (if added later)
+macos/Pods/
+macos/Flutter/ephemeral/
+
+# Linux/Windows build dirs (if added later)
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# Coverage / reports
+coverage/
+*.lcov
+
+# Env/config you may add later
+.env
+.env.*

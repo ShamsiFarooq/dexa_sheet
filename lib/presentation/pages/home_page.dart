@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:dexa_sheet/presentation/providers/sheet_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import '../widgets/grid_widget.dart';
-import 'package:path_provider/path_provider.dart';
 
 class HomePage extends StatefulWidget {
   final String sheetId;
@@ -13,41 +14,38 @@ class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePageState();
 }
-class _HomePageState extends State<HomePage> {
- @override
-void initState() {
-  super.initState();
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    Provider.of<SheetProvider>(context, listen: false).load(widget.sheetId);
-  });
-}
 
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<SheetProvider>(context, listen: false).load(widget.sheetId);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // Use Provider inline rather than storing a late field.
-   // final provider = Provider.of<SheetProvider>(context);
+    // final provider = Provider.of<SheetProvider>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E7D32),
         title: const Text('Dexa Sheet'),
         actions: [
           IconButton(
-            tooltip: 'Save locally',
+            tooltip: 'Sheet saved',
             icon: const Icon(Icons.save),
             onPressed: () async {
-              try {
-                final prov = Provider.of<SheetProvider>(context, listen: false);
-                debugPrint('Saving sheet...');
-
-                await prov.save(); // await to ensure Hive write finishes
-                debugPrint('Save completed.');
-
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved locally')));
-              } catch (e, st) {
-                debugPrint('Error saving sheet: $e\n$st');
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Save error: $e')));
-              }
+               final uid = FirebaseAuth.instance.currentUser?.uid;
+  debugPrint('Dexa DEBUG Save tap. uid=$uid');
+  try {
+    await Provider.of<SheetProvider>(context, listen: false).save();
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sheet saved')));
+  } catch (e, st) {
+    debugPrint('Save FAILED: $e\n$st');
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Save error: $e')));
+  }
             },
           ),
           IconButton(
@@ -66,7 +64,8 @@ void initState() {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF2E7D32),
         child: const Icon(Icons.add),
-        onPressed: () => Provider.of<SheetProvider>(context, listen: false).addRow(),
+        onPressed:
+            () => Provider.of<SheetProvider>(context, listen: false).addRow(),
       ),
       bottomNavigationBar: BottomAppBar(
         elevation: 8,
@@ -89,9 +88,13 @@ void initState() {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/sheet_export.csv');
       await file.writeAsString(csv);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('CSV exported: ${file.path}')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('CSV exported: ${file.path}')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error exporting CSV: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error exporting CSV: $e')));
     }
   }
 }

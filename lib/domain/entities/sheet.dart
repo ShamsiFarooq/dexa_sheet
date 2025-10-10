@@ -1,71 +1,57 @@
+// lib/domain/entities/sheet.dart
 import 'package:uuid/uuid.dart';
 
 class Sheet {
-  final String id;
+  String id;
   String name;
+  int rows;
+  int cols;
   List<List<String>> data;
+  String ownerId;
   DateTime lastModified;
+  List<double>? columnWidths;
+  List<double>? rowHeights;
 
   Sheet({
     required this.id,
     required this.name,
+    required this.rows,
+    required this.cols,
     required this.data,
+    required this.ownerId,
     required this.lastModified,
+    this.columnWidths,
+    this.rowHeights,
   });
 
-  factory Sheet.empty({String? name, int rows = 20, int cols = 8}) {
+  factory Sheet.empty({
+    String? id,
+    String name = 'Untitled Sheet',
+    int rows = 30,
+    int cols = 10,
+    String ownerId = '',
+  }) {
+    final grid = List.generate(rows, (_) => List.generate(cols, (_) => ''));
     return Sheet(
-      id: const Uuid().v4(),
-      name: name ?? 'Untitled Sheet',
-      data: List.generate(rows, (_) => List.generate(cols, (_) => '')),
+      id: id ?? const Uuid().v4(),
+      name: name,
+      rows: rows,
+      cols: cols,
+      data: grid,
+      ownerId: ownerId,
       lastModified: DateTime.now(),
     );
   }
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'data': data,
-        'lastModified': lastModified.toIso8601String(),
-      };
-
-  factory Sheet.fromJson(Map<String, dynamic> json) => Sheet(
-        id: json['id'],
-        name: json['name'],
-        data: (json['data'] as List)
-            .map<List<String>>((row) =>
-                (row as List).map<String>((cell) => cell.toString()).toList())
-            .toList(),
-        lastModified: DateTime.parse(json['lastModified']),
-      );
 }
 
 class SheetMeta {
   final String id;
-  String name;
-  DateTime lastModified;
+  final String name;
+  final DateTime lastModified;
 
   SheetMeta({
     required this.id,
     required this.name,
     required this.lastModified,
   });
-
-  factory SheetMeta.fromSheet(Sheet sheet) => SheetMeta(
-        id: sheet.id,
-        name: sheet.name,
-        lastModified: sheet.lastModified,
-      );
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'lastModified': lastModified.toIso8601String(),
-      };
-
-  factory SheetMeta.fromJson(Map<String, dynamic> json) => SheetMeta(
-        id: json['id'],
-        name: json['name'],
-        lastModified: DateTime.parse(json['lastModified']),
-      );
 }

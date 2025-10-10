@@ -6,9 +6,10 @@ import 'package:dexa_sheet/domain/repositories/sheet_repository.dart';
 
 class SaveSheetUseCase {
   final SheetRepository repository;
-  SaveSheetUseCase(this.repository);
+
+  SaveSheetUseCase({required this.repository});
 
   Future<void> call(Sheet sheet) async {
-    return repository.saveSheet(sheet);
+    await repository.saveSheet(sheet);
   }
 }

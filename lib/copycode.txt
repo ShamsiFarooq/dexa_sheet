@@ -1,0 +1,35 @@
+
+   Future<void> upsert(Map<String, dynamic> json) async {
+   final id = json['id'] as String?;
+    if (id == null || id.isEmpty) {
+      throw ArgumentError('Missing ID in sheet JSON');
+   }
+
+   final ref = _userCollection.doc(id);
+     try {
+       await _db.runTransaction((tx) async {
+         final snap = await tx.get(ref);
+         final now = FieldValue.serverTimestamp();
+
+         final base = Map<String, dynamic>.from(json);
+          Normalize timestamps to server time
+         if (snap.exists) {
+           base['lastModified'] = now;
+           tx.set(ref, base, SetOptions(merge: true));
+         } else {
+           base['createdAt'] = now;
+           base['lastModified'] = now;
+           tx.set(ref, base, SetOptions(merge: true));
+         }
+       });
+     } on FirebaseException catch (e) {
+        Surfaces rules/path payload errors
+        ignore: avoid_print
+       print('Firestore upsert error (${e.code}): ${e.message}');
+       rethrow;
+     } catch (e) {
+        ignore: avoid_print
+       print('Firestore upsert error: $e');
+       rethrow;
+     }
+   }

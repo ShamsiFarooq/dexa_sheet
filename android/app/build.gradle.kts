@@ -74,7 +74,3 @@ android {
 flutter {
     source = "../.."
 }
-
-// Apply the Google Services plugin to process the google-services.json file
-// This should be applied at the bottom of the file for Gradle Kotlin DSL
-apply(plugin = "com.google.gms.google-services")
